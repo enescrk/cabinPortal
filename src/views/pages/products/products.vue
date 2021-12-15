@@ -19,7 +19,20 @@ export default {
   },
   data() {
     return {
+      authStr: "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4",
       brandId: null,
+      showAddProductModal: false,
+      patterList: [],
+      productCodes:"",
+      addProductModel: {
+        "Brand": this.brandId,
+        "Pattern": null,
+        "Code": null,
+        "Name": "",
+        "CategoryGender": null,
+        "Description": "",
+        "IsActive": true
+    },
       title: "Orders",
       items: [
         {
@@ -87,8 +100,7 @@ export default {
     },
   },
   mounted() {
-     this.getBrandId(),
-    this.fetchData();
+    this.getBrandId(), this.fetchData(), this.getPatterns();
     // Set the initial number of items
   },
   watch: {
@@ -106,8 +118,8 @@ export default {
     },
   },
   methods: {
-     getBrandId(){
-      this.brandId = localStorage.getItem('brandId')
+    getBrandId() {
+      this.brandId = localStorage.getItem("brandId");
     },
     /**
      * Search the table data with search input
@@ -122,9 +134,9 @@ export default {
 
       axios
         .get(
-          `https://cabinfit.dev-cabin.com/panel/Product?Brand=${this.brandId}&Page=${
-            this.currentPage
-          }&PageSize=${this.perPage}${
+          `https://cabinfit.dev-cabin.com/panel/Product?Brand=${
+            this.brandId
+          }&Page=${this.currentPage}&PageSize=${this.perPage}${
             this.filter ? "&Code=" + this.filter : ""
           }${this.status ? "&IsActive=" + this.status : ""}`,
           { headers: { Authorization: AuthStr } }
@@ -136,6 +148,21 @@ export default {
             this.orderData = [];
           }
         })
+        .catch((error) => {
+          this.errorMessage = error.message;
+          console.error("There was an error!", error);
+        });
+    },
+
+    getPatterns() {
+      const AuthStr = "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4";
+
+      axios
+        .get(
+          `https://cabinfit.dev-cabin.com/panel/Brand/${this.brandId}/Patterns`,
+          { headers: { Authorization: AuthStr } }
+        )
+        .then((response) => (this.patterList = response.data))
         .catch((error) => {
           this.errorMessage = error.message;
           console.error("There was an error!", error);
@@ -160,12 +187,90 @@ export default {
         this.orderData = [];
       }
     },
+    getPatternCategoryGender(id){
+      let selectedCategoryGender = null
+      const AuthStr = "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4";
+
+      axios
+        .get(
+          `https://cabinfit.dev-cabin.com/panel/Patterns/${id}`,
+          { headers: { Authorization: AuthStr } }
+        )
+        .then((response) => (this.setModel(response.data.CategoryGenders[0].CategoryGender)))
+        .catch((error) => {
+          this.errorMessage = error.message;
+          console.error("There was an error!", error);
+        });
+        
+        return selectedCategoryGender
+    },
+
+    setModel(catGender){
+      let sendArr = [];
+      this.addProductModel['CategoryGender'] = catGender;
+      this.addProductModel['Brand'] = this.brandId;
+      this.productCodes.split('\n').forEach(element => {
+        this.addProductModel['Code'] = element;
+        sendArr.push(this.addProductModel)
+      });
+      this.saveProducts(sendArr)
+    },
+    saveProducts(model){
+     axios
+        .post("https://cabinfit.dev-cabin.com/panel/Product", model, {
+          headers: { Authorization: this.authStr },
+        })
+        .then(() => (window.alert("Ürünler başarıyla eklendi")))
+        .catch((error) => {
+          this.errorMessage = error.message;
+          console.error("There was an error!", error);
+        });
+  }
   },
+  
 };
 </script>
 
 <template>
   <Layout>
+    <div id="myModal" class="modal" v-if="showAddProductModal == true">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <div>
+          <span class="close" @click="showAddProductModal = false"
+            >&times;</span
+          >
+        </div>
+        <div class="row">
+          <form class="d-inline-flex mb-3">
+            <label class="my-1 me-2" for="order-selectinput"
+              >Kalıp Seçimi</label
+            >
+            <select class="form-control" name="category" v-model="addProductModel['Pattern']">
+              <option
+                v-for="pattern in patterList"
+                :key="pattern.Id"
+                :value="`${pattern.Id}`"
+              >
+                {{ pattern.Name }}
+              </option>
+            </select>
+          </form>
+        </div>
+
+        <div class="row mt-3">
+          <div>
+            Ürün Kodları
+          </div>
+          <textarea name="codes" cols="10" rows="5" v-model="productCodes"></textarea>
+        </div>
+        <div class="row mt-3">
+          <button type="button" class="btn btn-success btn-lg" @click="getPatternCategoryGender(addProductModel['Pattern'])">
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
     <div class="row">
       <div class="col-12">
@@ -180,7 +285,11 @@ export default {
               </select>
             </form>
           </div>
-          <button type="button" class="btn btn-success mb-3">
+          <button
+            type="button"
+            class="btn btn-success mb-3"
+            @click="showAddProductModal = true"
+          >
             <i class="mdi mdi-plus me-1"></i> Yeni Ürün Ekle
           </button>
         </div>
@@ -285,3 +394,43 @@ export default {
     </div>
   </Layout>
 </template>
+
+<style>
+.modal {
+  display: block;
+  position: fixed; /* Stay in place */
+  z-index: 999999; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
