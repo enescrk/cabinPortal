@@ -6,7 +6,7 @@ export const panelService = {
 };
 
 function post(urlExtra,model) {
-    let url = `https://cabinfit.dev-cabin.com/panel/${urlExtra}`
+    let url = `https://cabinfitapi.cabin.com.tr/panel/${urlExtra}`
 
     const requestOptions = {
         method: 'POST',
@@ -25,7 +25,7 @@ function post(urlExtra,model) {
   });
 }
 function get(urlExtra,query) {
-    let url = `https://cabinfit.dev-cabin.com/panel/${urlExtra}${query}`
+    let url = `https://cabinfitapi.cabin.com.tr/panel/${urlExtra}${query}`
 
     const requestOptions = {
         method: 'GET',

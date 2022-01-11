@@ -100,7 +100,7 @@ export default {
     fetchData(){
       const AuthStr = 'Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4'
 
-    axios.get(`https://cabinfit.dev-cabin.com/panel/Brand/${this.brandId}/Patterns`,{ headers: { Authorization: AuthStr } })
+    axios.get(`https://cabinfitapi.cabin.com.tr/panel/Brand/${this.brandId}/Patterns`,{ headers: { Authorization: AuthStr } })
     .then(
       response => this.setTable(response.data)
     

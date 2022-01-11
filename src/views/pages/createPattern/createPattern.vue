@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       brandId: null,
-      baseUrl: "https://cabinfit.dev-cabin.com",
+      baseUrl: "https://cabinfitapi.cabin.com.tr",
       authStr: "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4",
       showTable : false,
       sizes: [],
@@ -181,7 +181,7 @@ export default {
     },
     save(){
         axios
-        .post("https://cabinfit.dev-cabin.com/panel/Patterns?CategoryGenderId=24", this.requestModel, {
+        .post("https://cabinfitapi.cabin.com.tr/panel/Patterns?CategoryGenderId=24", this.requestModel, {
           headers: { Authorization: this.authStr },
         })
         .then(() => (window.alert("Kalıp Başarıyla Eklendi")))

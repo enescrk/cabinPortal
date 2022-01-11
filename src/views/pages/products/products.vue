@@ -1,13 +1,12 @@
 <script>
 import Layout from "../../layouts/main";
-import PageHeader from "@/components/page-header";
 import appConfig from "@/app.config";
 import axios from "axios";
 /**
  * Orders component
  */
 export default {
-  components: { Layout, PageHeader },
+  components: { Layout },
   page: {
     title: "Orders",
     meta: [
@@ -19,7 +18,7 @@ export default {
   },
   data() {
     return {
-      authStr: "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4",
+       authStr: "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4",
       brandId: null,
       showAddProductModal: false,
       patterList: [],
@@ -118,6 +117,16 @@ export default {
     },
   },
   methods: {
+    goToCreateProductWithExcel() {
+      this.$router.push({
+        path: "/addProductWithExcel",
+      });
+    },
+    goToCreateProductWithXml() {
+      this.$router.push({
+        path: "/addProductWithXML",
+      });
+    },
     getBrandId() {
       this.brandId = localStorage.getItem("brandId");
     },
@@ -134,7 +143,7 @@ export default {
 
       axios
         .get(
-          `https://cabinfit.dev-cabin.com/panel/Product?Brand=${
+          `https://cabinfitapi.cabin.com.tr/panel/Product?Brand=${
             this.brandId
           }&Page=${this.currentPage}&PageSize=${this.perPage}${
             this.filter ? "&Code=" + this.filter : ""
@@ -159,7 +168,7 @@ export default {
 
       axios
         .get(
-          `https://cabinfit.dev-cabin.com/panel/Brand/${this.brandId}/Patterns`,
+          `https://cabinfitapi.cabin.com.tr/panel/Brand/${this.brandId}/Patterns`,
           { headers: { Authorization: AuthStr } }
         )
         .then((response) => (this.patterList = response.data))
@@ -187,47 +196,47 @@ export default {
         this.orderData = [];
       }
     },
-    getPatternCategoryGender(id){
-      let selectedCategoryGender = null
+    getPatternCategoryGender(id) {
+      let selectedCategoryGender = null;
       const AuthStr = "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4";
 
       axios
-        .get(
-          `https://cabinfit.dev-cabin.com/panel/Patterns/${id}`,
-          { headers: { Authorization: AuthStr } }
+        .get(`https://cabinfitapi.cabin.com.tr/panel/Patterns/${id}`, {
+          headers: { Authorization: AuthStr },
+        })
+        .then((response) =>
+          this.setModel(response.data.CategoryGenders[0].CategoryGender)
         )
-        .then((response) => (this.setModel(response.data.CategoryGenders[0].CategoryGender)))
         .catch((error) => {
           this.errorMessage = error.message;
           console.error("There was an error!", error);
         });
-        
-        return selectedCategoryGender
+
+      return selectedCategoryGender;
     },
 
-    setModel(catGender){
+    setModel(catGender) {
       let sendArr = [];
-      this.addProductModel['CategoryGender'] = catGender;
-      this.addProductModel['Brand'] = this.brandId;
-      this.productCodes.split('\n').forEach(element => {
-        this.addProductModel['Code'] = element;
-        sendArr.push(this.addProductModel)
+      this.addProductModel["CategoryGender"] = catGender;
+      this.addProductModel["Brand"] = this.brandId;
+      this.productCodes.split("\n").forEach((element) => {
+        this.addProductModel["Code"] = element;
+        sendArr.push(this.addProductModel);
       });
-      this.saveProducts(sendArr)
+      this.saveProducts(sendArr);
     },
-    saveProducts(model){
-     axios
-        .post("https://cabinfit.dev-cabin.com/panel/Product", model, {
+    saveProducts(model) {
+      axios
+        .post("https://cabinfitapi.cabin.com.tr/panel/Product", model, {
           headers: { Authorization: this.authStr },
         })
-        .then(() => (window.alert("Ürünler başarıyla eklendi")))
+        .then(() => window.alert("Ürünler başarıyla eklendi"))
         .catch((error) => {
           this.errorMessage = error.message;
           console.error("There was an error!", error);
         });
-  }
+    },
   },
-  
 };
 </script>
 
@@ -246,7 +255,11 @@ export default {
             <label class="my-1 me-2" for="order-selectinput"
               >Kalıp Seçimi</label
             >
-            <select class="form-control" name="category" v-model="addProductModel['Pattern']">
+            <select
+              class="form-control"
+              name="category"
+              v-model="addProductModel['Pattern']"
+            >
               <option
                 v-for="pattern in patterList"
                 :key="pattern.Id"
@@ -262,16 +275,24 @@ export default {
           <div>
             Ürün Kodları
           </div>
-          <textarea name="codes" cols="10" rows="5" v-model="productCodes"></textarea>
+          <textarea
+            name="codes"
+            cols="10"
+            rows="5"
+            v-model="productCodes"
+          ></textarea>
         </div>
         <div class="row mt-3">
-          <button type="button" class="btn btn-success btn-lg" @click="getPatternCategoryGender(addProductModel['Pattern'])">
+          <button
+            type="button"
+            class="btn btn-success btn-lg"
+            @click="getPatternCategoryGender(addProductModel['Pattern'])"
+          >
             Kaydet
           </button>
         </div>
       </div>
     </div>
-    <PageHeader :title="title" :items="items" />
     <div class="row">
       <div class="col-12">
         <div>
@@ -291,6 +312,20 @@ export default {
             @click="showAddProductModal = true"
           >
             <i class="mdi mdi-plus me-1"></i> Yeni Ürün Ekle
+          </button>
+          <button
+            type="button"
+            class="btn btn-success mb-3 mx-2"
+            @click="goToCreateProductWithExcel()"
+          >
+            <i class="mdi mdi-plus me-1"></i> Yeni Ürün Ekle Excel
+          </button>
+          <button
+            type="button"
+            class="btn btn-success mb-3"
+            @click="goToCreateProductWithXml()"
+          >
+            <i class="mdi mdi-plus me-1"></i> Yeni Ürün Ekle XML
           </button>
         </div>
         <div

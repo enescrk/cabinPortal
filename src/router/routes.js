@@ -675,5 +675,21 @@ export default [{
     },
     component: () => import('../views/pages/createPattern/createPattern')
   },
+  {
+    path: '/addProductWithExcel',
+    name: '',
+    meta: {
+      authRequired: true
+    },
+    component: () => import('../views/pages/addProductWithExcel/addProductWithExcel')
+  },
+  {
+    path: '/addProductWithXML',
+    name: '',
+    meta: {
+      authRequired: true
+    },
+    component: () => import('../views/pages/addProductWithXML/addProductWithXML')
+  },
 
 ]
