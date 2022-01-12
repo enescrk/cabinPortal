@@ -22,7 +22,7 @@ export default {
   },
   data() {
     return {
-      titlte:"",
+      titlte: "",
       authStr: "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4",
       sendProductsModel: [],
       patterList: [],
@@ -122,22 +122,49 @@ export default {
     setTransportType(type) {
       this.transportType = type;
     },
-    saveMissingProp(index,type){
+    saveMissingProp(index, type) {
       let selectedInputElem = this.sendProductsModel[index];
-      selectedInputElem[type] = document.getElementById(`${type}-${index}`).value;
+      selectedInputElem[type] = document.getElementById(
+        `${type}-${index}`
+      ).value;
     },
-    saveProducts(){
+    saveProducts() {
       axios
-        .post("https://cabinfitapi.cabin.com.tr/panel/Product", this.sendProductsModel, {
-          headers: { Authorization: this.authStr },
-        })
+        .post(
+          "https://cabinfitapi.cabin.com.tr/panel/Product",
+          this.sendProductsModel,
+          {
+            headers: { Authorization: this.authStr },
+          }
+        )
         .then(() => window.alert("Ürünler başarıyla eklendi"))
         .catch((error) => {
           this.errorMessage = error.message;
           console.error("There was an error!", error);
         });
-    
-    }
+    },
+
+    controllDisablity() {
+      debugger; // eslint-disable-line no-debugger
+      let count = 0;
+      if (this.sendProductsModel.length != 0) {
+        this.sendProductsModel.forEach((element) => {
+          if (!element.Code) {
+            count++;
+          }
+          if (!element.Name) {
+            count++;
+          }
+        });
+        if (count == 0) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    },
   },
 };
 </script>
@@ -201,15 +228,29 @@ export default {
             <td>
               {{ prod.Code }}
               <span v-if="!prod.Code">
-                <input type="text" v-bind:id="'Code-' + index" placeholder="Ürün kodu girin">
-                <i class="fas fa-check-square" @click="saveMissingProp(index,'Code')"></i>
+                <input
+                  type="text"
+                  v-bind:id="'Code-' + index"
+                  placeholder="Ürün kodu girin"
+                />
+                <i
+                  class="fas fa-check-square"
+                  @click="saveMissingProp(index, 'Code')"
+                ></i>
               </span>
             </td>
             <td>
               {{ prod.Name }}
-               <span v-if="!prod.Name">
-                <input type="text" placeholder="Ürün adı girin" v-bind:id="'Name-' + index">
-                <i class="fas fa-check-square" @click="saveMissingProp(index,'Name')"></i>
+              <span v-if="!prod.Name">
+                <input
+                  type="text"
+                  placeholder="Ürün adı girin"
+                  v-bind:id="'Name-' + index"
+                />
+                <i
+                  class="fas fa-check-square"
+                  @click="saveMissingProp(index, 'Name')"
+                ></i>
               </span>
             </td>
             <td>
@@ -226,19 +267,29 @@ export default {
                 v-if="!prod.Code || !prod.Name"
                 style="color:red; font-weight:600;font-size:10px"
               >
-                Ürün kodu ve ürün adı zorunludur. 
+                Ürün kodu ve ürün adı zorunludur.
               </span>
             </td>
             <td>
-              <i class="fas fa-trash" @click="deletProductByIndex(index)" style="cursor:pointer"></i>
+              <i
+                class="fas fa-trash"
+                @click="deletProductByIndex(index)"
+                style="cursor:pointer"
+              ></i>
             </td>
           </tr>
         </table>
       </div>
       <div class="row">
-        <button type="button" class="btn btn-success btn-lg btn-block" @click="saveProducts()">Kaydet</button>
+        <button
+          type="button"
+          class="btn btn-success btn-lg btn-block"
+          @click="saveProducts()"
+          :disabled="controllDisablity()"
+        >
+          Kaydet
+        </button>
       </div>
-      
     </div>
   </Layout>
 </template>
