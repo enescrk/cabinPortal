@@ -96,6 +96,7 @@ export default {
     },
     logoutUser() {
       this.logout();
+      localStorage.removeItem("user")
       this.$router.push({
         path: "/account/login",
       });

@@ -223,10 +223,14 @@ export default {
       element.classList.toggle("show");
     },
     logoutUser() {
-      this.logout();
-      this.$router.push({
-        path: "/account/login",
-      });
+       localStorage.removeItem("user")
+      this.$auth?.logout().then(() => {
+           
+        }),(error) => {
+                console.log(error)
+            }
+      // this.logout();
+     
     },
     saveBrandId(){
       localStorage.setItem('brandId',this.brandId)
@@ -604,12 +608,12 @@ export default {
           <template v-slot:button-content>
             <img
               class="rounded-circle header-profile-user"
-              src="@/assets/images/users/avatar-4.jpg"
+              :src="$auth.user.picture"
               alt="Header Avatar"
             />
             <span
               class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"
-              >{{ $t("navbar.dropdown.marcus.text") }}</span
+              >{{ $auth.user.name }}</span
             >
             <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i>
           </template>

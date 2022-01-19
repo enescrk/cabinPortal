@@ -1,35 +1,54 @@
-import Vue from 'vue'
-import BootstrapVue from 'bootstrap-vue'
-import router from './router'
+import Vue from "vue";
+import BootstrapVue from "bootstrap-vue";
+import router from "./router";
 
-import vco from "v-click-outside"
-import VueApexCharts from 'vue-apexcharts'
-import VueSweetalert2 from 'vue-sweetalert2';
-import VueSlideBar from 'vue-slide-bar'
-import Vuelidate from 'vuelidate'
-import i18n from './i18n'
-import store from '@/state/store'
+import vco from "v-click-outside";
+import VueApexCharts from "vue-apexcharts";
+import VueSweetalert2 from "vue-sweetalert2";
+import VueSlideBar from "vue-slide-bar";
+import Vuelidate from "vuelidate";
+import i18n from "./i18n";
+import store from "@/state/store";
 
-import App from './App.vue'
+import App from "./App.vue";
 // As a plugin
-import VueMask from 'v-mask'
-Vue.config.productionTip = false
+import VueMask from "v-mask";
+Vue.config.productionTip = false;
 
 import * as VueGoogleMaps from "vue2-google-maps";
-import Lightbox from 'vue-easy-lightbox'
- 
-Vue.use(Lightbox)
+import Lightbox from "vue-easy-lightbox";
+
+Vue.use(Lightbox);
 Vue.use(VueGoogleMaps, {
   load: {
     key: "AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE",
-    libraries: "places"
+    libraries: "places",
   },
-  installComponents: true
+  installComponents: true,
 });
 
-import { initFirebaseBackend } from './helpers/firebase/authUtils';
+import { initFirebaseBackend } from "./helpers/firebase/authUtils";
 
-import { configureFakeBackend } from './helpers/fakebackend/fake-backend';
+import { configureFakeBackend } from "./helpers/fakebackend/fake-backend";
+
+import { domain, clientId } from "../auth_config.json";
+
+// Import the plugin here
+import { Auth0Plugin } from "./auth";
+
+Vue.use(Auth0Plugin, {
+  domain,
+  clientId,
+  onRedirectCallback: appState => {
+    router.push(
+      appState && appState.targetUrl
+        ? appState.targetUrl
+        : window.location.pathname
+    );
+  }
+});
+
+Vue.config.productionTip = false;
 
 const firebaseConfig = {
   apiKey: process.env.VUE_APP_APIKEY,
@@ -39,7 +58,7 @@ const firebaseConfig = {
   storageBucket: process.env.VUE_APP_STORAGEBUCKET,
   messagingSenderId: process.env.VUE_APP_MESSAGINGSENDERID,
   appId: process.env.VUE_APP_APPId,
-  measurementId: process.env.VUE_APP_MEASUREMENTID
+  measurementId: process.env.VUE_APP_MEASUREMENTID,
 };
 
 if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
@@ -48,13 +67,13 @@ if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
   configureFakeBackend();
 }
 
-import '@/assets/scss/app.scss'
- 
-Vue.component('VueSlideBar', VueSlideBar)
-Vue.use(BootstrapVue)
-Vue.use(vco)
-Vue.component('apexchart', VueApexCharts)
-Vue.use(Vuelidate)
+import "@/assets/scss/app.scss";
+
+Vue.component("VueSlideBar", VueSlideBar);
+Vue.use(BootstrapVue);
+Vue.use(vco);
+Vue.component("apexchart", VueApexCharts);
+Vue.use(Vuelidate);
 Vue.use(VueSweetalert2);
 
 Vue.use(require("vue-chartist"));
@@ -64,5 +83,5 @@ new Vue({
   router,
   store,
   i18n,
-  render: h => h(App),
-}).$mount('#app')
+  render: (h) => h(App),
+}).$mount("#app");
