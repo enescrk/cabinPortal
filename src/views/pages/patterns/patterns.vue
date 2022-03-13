@@ -89,6 +89,11 @@ export default {
         path: "/createPattern",
       });
     },
+       goToCreateBulkPatternPage(){
+       this.$router.push({
+        path: "/createPatternFromExcel",
+      });
+    },
     /**
      * Search the table data with search input
      */
@@ -153,6 +158,13 @@ export default {
             @click=" goToCreatePatternPage()"
           >
             <i class="mdi mdi-plus me-1"></i> Yeni Kalıp Ekle
+          </button>
+          <button
+            type="button"
+            class="btn btn-success mb-3"
+            @click=" goToCreateBulkPatternPage()"
+          >
+            <i class="mdi mdi-plus me-1"></i> Toplu Kalıp Ekle
           </button>
         </div>
         <div class="table table-centered datatable dt-responsive nowrap table-card-list dataTable no-footer dtr-inline">
