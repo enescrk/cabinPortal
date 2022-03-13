@@ -21,7 +21,7 @@ export default {
       titlte: "",
       authStr: "Bearer 856706c3-b793-45c1-ab84-bb29d524c9d4",
       sendProductsModel: [],
-      patterList: [],
+      patternList: [],
       brandId: 1,
       selectedPattern: null,
     };
@@ -89,7 +89,6 @@ export default {
       });
 
       let filteredPattern = [];
-      let patternList = [];
       patternNameList.forEach((patternName) => {
         filteredPattern = rows.filter((x) => x[1] == patternName);
 
@@ -124,53 +123,22 @@ export default {
         preferenceParameterModel = [];
         sizeList = [];
 
-        patternList.push({ Name: patternName, Description: "", Brand: this.brandId, IsActive: true, CategoryGenders: categoryGenderModel });
+        this.patternList.push({ Name: patternName, Description: "", Brand: this.brandId, IsActive: true, CategoryGenders: categoryGenderModel });
         categoryGenderModel = [];
       });
-
-      console.log(JSON.stringify(patternList));
-
-     
-
-      rows.forEach(
-        async function(vals) {
-          var productModel = {
-            Brand: 1,
-            Pattern: 1,
-            Code: vals[1],
-            Name: vals[2],
-            CategoryGender: null, // TODO: Patternda döenen değer setlenecek
-            Description: vals[3],
-            IsActive: true,
-          };
-
-          this.sendProductsModel.push(productModel);
-        }.bind(this)
-      );
-      console.log(this.sendProductsModel);
+      console.log(this.patternList)
     },
-    deletProductByIndex(index) {
-      this.sendProductsModel.splice(index, 1);
-    },
-    setTransportType(type) {
-      this.transportType = type;
-    },
-    saveMissingProp(index, type) {
-      let selectedInputElem = this.sendProductsModel[index];
-      selectedInputElem[type] = document.getElementById(
-        `${type}-${index}`
-      ).value;
-    },
-    saveProducts() {
+
+    savePattern() {
       axios
         .post(
-          "https://cabinfitapi.cabin.com.tr/panel/Product",
-          this.sendProductsModel,
+          "https://cabinfitapi.cabin.com.tr/panel/Patterns",
+          this.patternList,
           {
             headers: { Authorization: this.authStr },
           }
         )
-        .then(() => window.alert("Ürünler başarıyla eklendi"))
+        .then((res) => res.isSuccess ? window.alert("Kalıplar başarıyla eklendi") : window.alert("Kalıplar yüklenirken hata oluştu."))
         .catch((error) => {
           this.errorMessage = error.message;
           console.error("There was an error!", error);
@@ -178,24 +146,7 @@ export default {
     },
 
     controllDisablity() {
-      let count = 0;
-      if (this.sendProductsModel.length != 0) {
-        this.sendProductsModel.forEach((element) => {
-          if (!element.Code) {
-            count++;
-          }
-          if (!element.Name) {
-            count++;
-          }
-        });
-        if (count == 0) {
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        return true;
-      }
+      return false
     },
   },
 };
@@ -210,23 +161,7 @@ export default {
           olduğu excel dosyasını seçerek ürünlerinizi kaydedebilirsiniz.
         </div>
       </div>
-      <div class="row" v-if="sendProductsModel.length == 0">
-        <form class="d-inline-flex mb-3">
-          <label class="my-1 me-2" for="order-selectinput">Kalıp Seçimi</label>
-          <select
-            class="form-control"
-            name="category"
-            v-model="selectedPattern"
-          >
-            <option
-              v-for="pattern in patterList"
-              :key="pattern.Id"
-              :value="pattern"
-            >
-              {{ pattern.Name }}
-            </option>
-          </select>
-        </form>
+      <div class="row" v-if="patternList.length == 0">
         <label class="btn btn-success btn-file mx-auto">
           <i class="fas fa-table"></i>
           Dosya Seç
@@ -239,75 +174,26 @@ export default {
         </label>
       </div>
 
-      <div class="row productList" v-if="sendProductsModel.length > 0">
+      <div class="row productList" v-if="patternList.length > 0">
         <table>
           <tr>
             <th>#</th>
-            <th>Kalıp</th>
-            <th>Ürün Kodu</th>
-            <th>Ürün Adı</th>
-            <th>Ürün Açıklaması</th>
-            <th>Durum</th>
-            <th>İşlem</th>
+            <th>Adı</th>
+            <th>Açıklama</th>
+            <th>CategoryGender</th>
           </tr>
-          <tr v-for="(prod, index) in sendProductsModel" :key="prod.Id">
+          <tr v-for="(pattern, index) in patternList" :key="pattern.id">
             <td>
               {{ index + 1 }}
             </td>
             <td>
-              {{ selectedPattern.Name }}
+              {{ pattern.Name }}
             </td>
             <td>
-              {{ prod.Code }}
-              <span v-if="!prod.Code">
-                <input
-                  type="text"
-                  v-bind:id="'Code-' + index"
-                  placeholder="Ürün kodu girin"
-                />
-                <i
-                  class="fas fa-check-square"
-                  @click="saveMissingProp(index, 'Code')"
-                ></i>
-              </span>
+              {{ pattern.Description }}
             </td>
             <td>
-              {{ prod.Name }}
-              <span v-if="!prod.Name">
-                <input
-                  type="text"
-                  placeholder="Ürün adı girin"
-                  v-bind:id="'Name-' + index"
-                />
-                <i
-                  class="fas fa-check-square"
-                  @click="saveMissingProp(index, 'Name')"
-                ></i>
-              </span>
-            </td>
-            <td>
-              {{ prod.Description }}
-            </td>
-            <td>
-              <span
-                v-if="prod.Code && prod.Name"
-                style="color:green; font-weight:600;font-size:10px"
-              >
-                Başarılı
-              </span>
-              <span
-                v-if="!prod.Code || !prod.Name"
-                style="color:red; font-weight:600;font-size:10px"
-              >
-                Ürün kodu ve ürün adı zorunludur.
-              </span>
-            </td>
-            <td>
-              <i
-                class="fas fa-trash"
-                @click="deletProductByIndex(index)"
-                style="cursor:pointer"
-              ></i>
+              {{ pattern.CategoryGenders[0].CategoryGender }}
             </td>
           </tr>
         </table>
@@ -316,7 +202,7 @@ export default {
         <button
           type="button"
           class="btn btn-success btn-lg btn-block"
-          @click="saveProducts()"
+          @click="savePattern()"
           :disabled="controllDisablity()"
         >
           Kaydet
